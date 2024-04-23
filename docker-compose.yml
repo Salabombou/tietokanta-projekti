@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  tietokanta-projekti:
+    build: .
+    depends_on:
+      mssql:
+        condition: service_healthy
+
+  mssql:
+    build:
+      context: ./mssql
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Nakkikastike12"
+      MSSQL_PID: "Express"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    healthcheck:
+      test: [ "CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "SA", "-P", "Nakkikastike12", "-d", "RecipeDB", "-q", "SELECT 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+   mssql-data:
