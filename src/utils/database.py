@@ -89,10 +89,11 @@ def view_recipe(cursor: Cursor):
 
     recipe = recipes[int(key) - 1]
     recipe_id = recipe[0]
+    recipe_name = recipe[1]
 
     os.system("clear")
 
-    print(f"{recipe[1]}\n")
+    print(f"{recipe_name}\n")
 
     # Get the ingredients, hardware, and categories
     cursor.execute(
@@ -112,6 +113,13 @@ def view_recipe(cursor: Cursor):
         (recipe_id,),
     )
     categories = cursor.fetchall()
+    
+    # Get all recipe names with similar categories
+    cursor.execute(
+        "SELECT [name] FROM Recipes WHERE id IN (SELECT recipe_id FROM RecipeCategories WHERE category_id IN (SELECT category_id FROM RecipeCategories WHERE recipe_id = %s)) AND id != %s",
+        (recipe_id, recipe_id),
+    )
+    similar_recipes = cursor.fetchall()
 
     print("Ingredients:")
     for ingredient in ingredients:
@@ -128,7 +136,11 @@ def view_recipe(cursor: Cursor):
     print(recipe[2] + "\n")
 
     print("Total cooking time:")
-    print(f"{recipe[3]} minutes")
+    print(f"{recipe[3]} minutes\n")
+    
+    print("You might also like:")
+    print(", ".join((r[0] for r in similar_recipes)) + "\n")
+    
 
     print("\nPress any key to continue...")
     input()
