@@ -1,10 +1,11 @@
-import pymssql
+import psycopg2
+
 import os
 
 from utils import database
 
 
-def mainmenu(cursor: pymssql.Cursor):
+def mainmenu(cursor: psycopg2.extensions.cursor):
     os.system("clear")
     print("Tietokanta Projekti\n")
     print("Options\n")
@@ -30,19 +31,20 @@ def mainmenu(cursor: pymssql.Cursor):
 
 
 def main():
-    conn = pymssql.connect(
-        server="mssql",
-        user="sa",
+    connection = psycopg2.connect(
+        user="admin",
         password="Nakkikastike12",
-        database="RecipeDB",
+        host="postgres",
+        port="5432",
+        database="RecipeDB"
     )
-    cursor = conn.cursor()
-
+    cursor = connection.cursor()
+    
     try:
         mainmenu(cursor)
     finally:
-        conn.commit()
-        conn.close()
+        connection.commit()
+        connection.close()
 
 
 if __name__ == "__main__":

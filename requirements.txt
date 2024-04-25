@@ -5,3 +5,4 @@ readchar==4.0.6
 setuptools==69.0.3
 smmap==5.0.1
 wheel==0.43.0
+psycopg2==2.9.9

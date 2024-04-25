@@ -1,29 +1,29 @@
 import os
-from pymssql import Cursor
+from psycopg2.extensions import cursor
 
 from typing import Dict
 
 
-def search_recipe_name(cursor: Cursor):
+def search_recipe_name(cursor: cursor):
     os.system("clear")
     print("Search Recipes by Name\n")
 
     search = input("Search: ")
 
-    cursor.execute("SELECT * FROM Recipes WHERE [name] LIKE %s", (f"%{search}%",))
+    cursor.execute("SELECT * FROM Recipes WHERE \"name\" LIKE %s", (f"%{search}%",))
     recipes = cursor.fetchall()
 
     return recipes
 
 
-def search_recipe_ingredients(cursor: Cursor):
+def search_recipe_ingredients(cursor: cursor):
     os.system("clear")
     print("Search Recipes by Ingredients\n")
 
     search = input("Search: ")
 
     cursor.execute(
-        "SELECT * FROM Recipes WHERE [name] IN (SELECT [name] FROM Ingredients WHERE [name] LIKE %s)",
+        "SELECT * FROM Recipes WHERE \"name\" IN (SELECT \"name\" FROM Ingredients WHERE \"name\" LIKE %s)",
         (f"%{search}%",),
     )
     recipes = cursor.fetchall()
@@ -31,7 +31,7 @@ def search_recipe_ingredients(cursor: Cursor):
     return recipes
 
 
-def search_recipe(cursor: Cursor):
+def search_recipe(cursor: cursor):
     os.system("clear")
     print("Search Recipe\n")
 
@@ -62,7 +62,7 @@ def search_recipe(cursor: Cursor):
     input()
 
 
-def view_recipe(cursor: Cursor):
+def view_recipe(cursor: cursor):
     recipes = search_recipe_name(cursor)
     os.system("clear")
     if len(recipes) == 0:
@@ -97,26 +97,26 @@ def view_recipe(cursor: Cursor):
 
     # Get the ingredients, hardware, and categories
     cursor.execute(
-        "SELECT [name], quantity FROM Ingredients JOIN RecipeIngredients ON Ingredients.id = RecipeIngredients.ingredient_id WHERE recipe_id = %s",
+        "SELECT \"name\", quantity FROM Ingredients JOIN RecipeIngredients ON Ingredients.id = RecipeIngredients.ingredient_id WHERE recipe_id = %s",
         (recipe_id,),
     )
     ingredients = cursor.fetchall()
 
     cursor.execute(
-        "SELECT [name] FROM Hardware JOIN RecipeHardware ON Hardware.id = RecipeHardware.hardware_id WHERE recipe_id = %s",
+        "SELECT \"name\" FROM Hardware JOIN RecipeHardware ON Hardware.id = RecipeHardware.hardware_id WHERE recipe_id = %s",
         (recipe_id,),
     )
     hardware = cursor.fetchall()
 
     cursor.execute(
-        "SELECT [name] FROM Categories JOIN RecipeCategories ON Categories.id = RecipeCategories.category_id WHERE recipe_id = %s",
+        "SELECT \"name\" FROM Categories JOIN RecipeCategories ON Categories.id = RecipeCategories.category_id WHERE recipe_id = %s",
         (recipe_id,),
     )
     categories = cursor.fetchall()
     
     # Get all recipe names with similar categories
     cursor.execute(
-        "SELECT [name] FROM Recipes WHERE id IN (SELECT recipe_id FROM RecipeCategories WHERE category_id IN (SELECT category_id FROM RecipeCategories WHERE recipe_id = %s)) AND id != %s",
+        "SELECT \"name\" FROM Recipes WHERE id IN (SELECT recipe_id FROM RecipeCategories WHERE category_id IN (SELECT category_id FROM RecipeCategories WHERE recipe_id = %s)) AND id != %s",
         (recipe_id, recipe_id),
     )
     similar_recipes = cursor.fetchall()
@@ -146,7 +146,7 @@ def view_recipe(cursor: Cursor):
     input()
 
 
-def add_recipe(cursor: Cursor):
+def add_recipe(cursor: cursor):
     quantity: Dict[str, str] = {}
 
     os.system("clear")
@@ -166,12 +166,12 @@ def add_recipe(cursor: Cursor):
         )
 
         # Check if ingredient is in the database
-        cursor.execute("SELECT * FROM Ingredients WHERE [name] = %s", (ingredient,))
+        cursor.execute("SELECT * FROM Ingredients WHERE \"name\" = %s", (ingredient,))
         result = cursor.fetchone()
         if result is None:
             # Ingredient is not in the database, so add it
             cursor.execute(
-                "INSERT INTO Ingredients ([name], alternatives) VALUES (%s, %s)",
+                "INSERT INTO Ingredients (\"name\", alternatives) VALUES (%s, %s)",
                 (ingredient, alternatives),
             )
         elif len(alternatives) > 0:
@@ -179,7 +179,7 @@ def add_recipe(cursor: Cursor):
 
             # Get the current alternatives
             cursor.execute(
-                "SELECT alternatives FROM Ingredients WHERE [name] = %s", (ingredient,)
+                "SELECT alternatives FROM Ingredients WHERE \"name\" = %s", (ingredient,)
             )
             current_alternatives = (cursor.fetchone() or [""])[0].split(",")
 
@@ -188,27 +188,27 @@ def add_recipe(cursor: Cursor):
 
             # Update the alternatives
             cursor.execute(
-                "UPDATE Ingredients SET alternatives = %s WHERE [name] = %s",
+                "UPDATE Ingredients SET alternatives = %s WHERE \"name\" = %s",
                 (alternatives, ingredient),
             )
 
     hardware = (h.strip() for h in input("Hardware: ").split(","))
     for hardware in hardware:
         # Check if hardware is in the database
-        cursor.execute("SELECT * FROM Hardware WHERE [name] = %s", (hardware,))
+        cursor.execute("SELECT * FROM Hardware WHERE \"name\" = %s", (hardware,))
         result = cursor.fetchone()
         if result is None:
             # Hardware is not in the database, so add it
-            cursor.execute("INSERT INTO Hardware ([name]) VALUES (%s)", (hardware,))
+            cursor.execute("INSERT INTO Hardware (\"name\") VALUES (%s)", (hardware,))
 
     categories = (c.strip() for c in input("Categories: ").split(","))
     for category in categories:
         # Check if category is in the database
-        cursor.execute("SELECT * FROM Categories WHERE [name] = %s", (category,))
+        cursor.execute("SELECT * FROM Categories WHERE \"name\" = %s", (category,))
         result = cursor.fetchone()
         if result is None:
             # Category is not in the database, so add it
-            cursor.execute("INSERT INTO Categories ([name]) VALUES (%s)", (category,))
+            cursor.execute("INSERT INTO Categories (\"name\") VALUES (%s)", (category,))
 
     instructions = input("Instructions: ")
 
@@ -216,7 +216,7 @@ def add_recipe(cursor: Cursor):
 
     # Add the recipe
     cursor.execute(
-        "INSERT INTO Recipes ([name], instructions, total_cooking_time) VALUES (%s, %s, %s)",
+        "INSERT INTO Recipes (\"name\", instructions, total_cooking_time) VALUES (%s, %s, %s)",
         (name, instructions, total_cooking_time),
     )
 
@@ -224,11 +224,11 @@ def add_recipe(cursor: Cursor):
     recipe_id = cursor.fetchone()[0]
 
     for ingredient in ingredients:
-        cursor.execute("SELECT id FROM Ingredients WHERE [name] = %s", (ingredient,))
+        cursor.execute("SELECT id FROM Ingredients WHERE \"name\" = %s", (ingredient,))
         ingredient_id = cursor.fetchone()
         if ingredient_id is None:
             cursor.execute(
-                "INSERT INTO Ingredients ([name]) VALUES (%s)", (ingredient,)
+                "INSERT INTO Ingredients (\"name\") VALUES (%s)", (ingredient,)
             )
             cursor.execute("SELECT SCOPE_IDENTITY()")
             ingredient_id = cursor.fetchone()
@@ -240,10 +240,10 @@ def add_recipe(cursor: Cursor):
         )
 
     for hardware in hardware:
-        cursor.execute("SELECT id FROM Hardware WHERE [name] = %s", (hardware,))
+        cursor.execute("SELECT id FROM Hardware WHERE \"name\" = %s", (hardware,))
         hardware_id = cursor.fetchone()
         if hardware_id is None:
-            cursor.execute("INSERT INTO Hardware ([name]) VALUES (%s)", (hardware,))
+            cursor.execute("INSERT INTO Hardware (\"name\") VALUES (%s)", (hardware,))
             cursor.execute("SELECT SCOPE_IDENTITY()")
             hardware_id = cursor.fetchone()
         hardware_id = hardware_id[0]
@@ -254,7 +254,7 @@ def add_recipe(cursor: Cursor):
         )
 
     for category in categories:
-        cursor.execute("SELECT id FROM Categories WHERE [name] = %s", (category,))
+        cursor.execute("SELECT id FROM Categories WHERE \"name\" = %s", (category,))
         category_id = cursor.fetchone()[0]
         cursor.execute(
             "INSERT INTO RecipeCategories (recipe_id, category_id) VALUES (%s, %s)",
@@ -266,7 +266,7 @@ def add_recipe(cursor: Cursor):
     input()
 
 
-def update_recipe(cursor: Cursor):
+def update_recipe(cursor: cursor):
     recipes = search_recipe_name(cursor)
     if len(recipes) == 0:
         print("No recipes found!")
@@ -303,7 +303,7 @@ def update_recipe(cursor: Cursor):
     if input("Update name? (y/n): ").lower() == "y":
         name = input(f"Name: ")
         cursor.execute(
-            "UPDATE Recipes SET [name] = %s WHERE id = %s", (name, recipe_id)
+            "UPDATE Recipes SET \"name\" = %s WHERE id = %s", (name, recipe_id)
         )
 
     if input("Update ingredients? (y/n): ").lower() == "y":
@@ -322,12 +322,12 @@ def update_recipe(cursor: Cursor):
             )
 
             # Check if ingredient is in the database
-            cursor.execute("SELECT * FROM Ingredients WHERE [name] = %s", (ingredient,))
+            cursor.execute("SELECT * FROM Ingredients WHERE \"name\" = %s", (ingredient,))
             result = cursor.fetchone()
             if result is None:
                 # Ingredient is not in the database, so add it
                 cursor.execute(
-                    "INSERT INTO Ingredients ([name], alternatives) VALUES (%s, %s)",
+                    "INSERT INTO Ingredients (\"name\", alternatives) VALUES (%s, %s)",
                     (ingredient, alternatives),
                 )
             elif len(alternatives) > 0:
@@ -335,7 +335,7 @@ def update_recipe(cursor: Cursor):
 
                 # Get the current alternatives
                 cursor.execute(
-                    "SELECT alternatives FROM Ingredients WHERE [name] = %s",
+                    "SELECT alternatives FROM Ingredients WHERE \"name\" = %s",
                     (ingredient,),
                 )
                 current_alternatives = (cursor.fetchone() or [""])[0].split(",")
@@ -347,7 +347,7 @@ def update_recipe(cursor: Cursor):
 
                 # Update the alternatives
                 cursor.execute(
-                    "UPDATE Ingredients SET alternatives = %s WHERE [name] = %s",
+                    "UPDATE Ingredients SET alternatives = %s WHERE \"name\" = %s",
                     (alternatives, ingredient),
                 )
 
@@ -356,7 +356,7 @@ def update_recipe(cursor: Cursor):
         )
         for ingredient in ingredients:
             cursor.execute(
-                "SELECT id FROM Ingredients WHERE [name] = %s", (ingredient,)
+                "SELECT id FROM Ingredients WHERE \"name\" = %s", (ingredient,)
             )
             ingredient_id = cursor.fetchone()[0]
             cursor.execute(
@@ -369,13 +369,13 @@ def update_recipe(cursor: Cursor):
         cursor.execute("DELETE FROM RecipeHardware WHERE recipe_id = %s", (recipe_id,))
         for hardware in hardware:
             # Check if hardware is in the database
-            cursor.execute("SELECT * FROM Hardware WHERE [name] = %s", (hardware,))
+            cursor.execute("SELECT * FROM Hardware WHERE \"name\" = %s", (hardware,))
             result = cursor.fetchone()
             if result is None:
                 # Hardware is not in the database, so add it
-                cursor.execute("INSERT INTO Hardware ([name]) VALUES (%s)", (hardware,))
+                cursor.execute("INSERT INTO Hardware (\"name\") VALUES (%s)", (hardware,))
 
-            cursor.execute("SELECT id FROM Hardware WHERE [name] = %s", (hardware,))
+            cursor.execute("SELECT id FROM Hardware WHERE \"name\" = %s", (hardware,))
             hardware_id = cursor.fetchone()[0]
             cursor.execute(
                 "INSERT INTO RecipeHardware (recipe_id, hardware_id) VALUES (%s, %s)",
@@ -389,15 +389,15 @@ def update_recipe(cursor: Cursor):
         )
         for category in categories:
             # Check if category is in the database
-            cursor.execute("SELECT * FROM Categories WHERE [name] = %s", (category,))
+            cursor.execute("SELECT * FROM Categories WHERE \"name\" = %s", (category,))
             result = cursor.fetchone()
             if result is None:
                 # Category is not in the database, so add it
                 cursor.execute(
-                    "INSERT INTO Categories ([name]) VALUES (%s)", (category,)
+                    "INSERT INTO Categories (\"name\") VALUES (%s)", (category,)
                 )
 
-            cursor.execute("SELECT id FROM Categories WHERE [name] = %s", (category,))
+            cursor.execute("SELECT id FROM Categories WHERE \"name\" = %s", (category,))
             category_id = cursor.fetchone()[0]
             cursor.execute(
                 "INSERT INTO RecipeCategories (recipe_id, category_id) VALUES (%s, %s)",
@@ -423,7 +423,7 @@ def update_recipe(cursor: Cursor):
     input()
 
 
-def delete_recipe(cursor: Cursor):
+def delete_recipe(cursor: cursor):
     recipes = search_recipe_name(cursor)
     if len(recipes) == 0:
         print("No recipes found!")
@@ -479,16 +479,16 @@ def delete_recipe(cursor: Cursor):
     recipe_id = recipe[0]
 
     os.system("clear")
-
+    
     print(f"Delete Recipe ({recipe[1]})\n")
 
     if input("Are you sure you want to delete this recipe? (y/n): ").lower() == "y":
         cursor.execute(
-            "DELETE FROM RecipeIngredients WHERE recipe_id = %s", (recipe_id)
+            "DELETE FROM RecipeIngredients WHERE recipe_id = %s", (recipe_id,)
         )
-        cursor.execute("DELETE FROM RecipeHardware WHERE recipe_id = %s", (recipe_id))
-        cursor.execute("DELETE FROM RecipeCategories WHERE recipe_id = %s", (recipe_id))
-        cursor.execute("DELETE FROM Recipes WHERE id = %s", (recipe_id))
+        cursor.execute("DELETE FROM RecipeHardware WHERE recipe_id = %s", (recipe_id,))
+        cursor.execute("DELETE FROM RecipeCategories WHERE recipe_id = %s", (recipe_id,))
+        cursor.execute("DELETE FROM Recipes WHERE id = %s", (recipe_id,))
 
         print("Recipe deleted!")
     else:
