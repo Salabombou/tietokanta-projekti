@@ -2,13 +2,13 @@
 INSERT INTO Ingredients ("name", alternatives) VALUES 
 ('Flour', 'Almond flour'),
 ('Sugar', 'Honey'),
-('Eggs', 'Banana'),
+('Eggs', NULL),
 ('Milk', 'Almond milk'),
 ('Macaroni', 'Any Short Pasta'),
 ('Minced meat', 'Vegan minced meat'),
-('Egg'),
-('Bouillon cube'),
-('Water');
+('Chocolate', 'White chocolate' ),
+('Bouillon cube', NULL),
+('Water', NULL);
 
 -- Inserting some hardware
 INSERT INTO Hardware ("name") VALUES 
@@ -55,7 +55,7 @@ INSERT INTO RecipeIngredients (recipe_id, ingredient_id, quantity) VALUES
 (4, 6, '300g'),
 (5, 5, '400g'),
 (5, 6, '400g'),
-(5, 7, '3'),
+(5, 3, '3'),
 (5, 8, '2'),
 (5, 9, '1L');
   

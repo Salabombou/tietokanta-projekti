@@ -1,5 +1,7 @@
 # Tietokanta Projekti
+![Schema](./assets/schema.png)
 
+### Description
 This project is a Python application that interacts with a SQL database to manage recipes.
 
 ### Prerequisites
