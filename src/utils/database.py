@@ -5,6 +5,16 @@ from typing import Dict
 
 
 def search_recipe_name(cursor: cursor):
+    """
+    This function searches for recipes by name in the Recipes table of a database.
+
+    Parameters:
+    cursor (cursor): A cursor object to interact with the database.
+
+    Returns:
+    list: A list of tuples where each tuple represents a recipe that matches the search term.
+    """
+    
     os.system("clear")
     print("Search Recipes by Name\n")
 
@@ -17,6 +27,20 @@ def search_recipe_name(cursor: cursor):
 
 
 def search_recipe_ingredients(cursor: cursor):
+    """
+    This function allows the user to search for recipes based on ingredients.
+
+    It first clears the terminal screen, then prompts the user to enter an ingredient to search for.
+    It then executes a SQL query that selects all recipes where the ingredient name matches the user's input.
+    The results of the query are fetched and returned as a list of tuples.
+
+    Parameters:
+    cursor (cursor): A cursor object that allows Python code to execute PostgreSQL command in a database session.
+
+    Returns:
+    list: A list of tuples representing the recipes that contain the searched ingredient.
+    """
+    
     os.system("clear")
     print("Search Recipes by Ingredients\n")
 
@@ -32,6 +56,19 @@ def search_recipe_ingredients(cursor: cursor):
 
 
 def search_recipe(cursor: cursor):
+    """
+    This function provides a menu to search for recipes in the database.
+    The user can choose to search by name or ingredients. The results are then displayed.
+    If the user chooses to return to the main menu, the function will terminate.
+    If an invalid option is chosen, the function will call itself again.
+
+    Parameters:
+    cursor (cursor): A database cursor to execute queries.
+
+    Returns:
+    None
+    """
+    
     os.system("clear")
     print("Search Recipe\n")
 
@@ -63,6 +100,29 @@ def search_recipe(cursor: cursor):
 
 
 def view_recipe(cursor: cursor):
+    """
+    This function allows the user to view a recipe from the database.
+
+    It first clears the terminal and then displays all the recipes available. The user can select a recipe by entering its corresponding number or return to the main menu by entering 'q'.
+
+    After a recipe is selected, the function retrieves and displays the following details about the recipe:
+    - Name
+    - Ingredients and their quantities
+    - Required hardware
+    - Categories
+    - Instructions
+    - Total cooking time
+    - Similar recipes based on categories
+
+    The user can return to the main menu by pressing any key.
+
+    Parameters:
+    cursor (cursor): The cursor object to execute database queries.
+
+    Returns:
+    None
+    """
+    
     recipes = search_recipe_name(cursor)
     os.system("clear")
     if len(recipes) == 0:
@@ -147,6 +207,20 @@ def view_recipe(cursor: cursor):
 
 
 def add_recipe(cursor: cursor):
+    """
+    This function adds a new recipe to the database. It prompts the user for the recipe's name, ingredients, 
+    hardware, categories, instructions, and total cooking time. For each ingredient, hardware, and category, 
+    it checks if it already exists in the database. If not, it adds it. It then adds the recipe to the Recipes 
+    table and links the recipe to its ingredients, hardware, and categories in the RecipeIngredients, 
+    RecipeHardware, and RecipeCategories tables respectively.
+
+    Args:
+        cursor (cursor): A cursor object to execute database queries.
+
+    Returns:
+        None
+    """
+    
     quantity: Dict[str, str] = {}
 
     os.system("clear")
@@ -267,6 +341,21 @@ def add_recipe(cursor: cursor):
 
 
 def update_recipe(cursor: cursor):
+    """
+    This function allows the user to update a recipe in the database. The user can update the name, ingredients, 
+    hardware, categories, instructions, and total cooking time of the recipe. If the user chooses to update the 
+    ingredients, hardware, or categories, and if any of these are not already in the database, they will be added. 
+    The function also handles the case where the user wants to update the alternatives for an ingredient. 
+    If the ingredient is not in the database, it will be added along with its alternatives. If the ingredient 
+    is already in the database, the alternatives will be updated to include both the current and new alternatives.
+
+    Parameters:
+    cursor (cursor): A cursor object to execute PostgreSQL commands in a database session.
+
+    Returns:
+    None
+    """
+    
     recipes = search_recipe_name(cursor)
     if len(recipes) == 0:
         print("No recipes found!")
@@ -424,6 +513,19 @@ def update_recipe(cursor: cursor):
 
 
 def delete_recipe(cursor: cursor):
+    """
+    This function allows the user to delete a recipe from the database. The user can choose to delete a specific recipe
+    or all recipes. The function first searches for recipes and if found, prompts the user to select a recipe to delete.
+    If the user chooses to delete all recipes, a confirmation is required. If a specific recipe is chosen, the function
+    deletes the recipe from the RecipeIngredients, RecipeHardware, RecipeCategories, and Recipes tables in the database.
+    After a deletion operation, the user is prompted to press any key to continue.
+
+    Parameters:
+    cursor (cursor): A cursor object to execute database operations.
+
+    Returns:
+    None
+    """
     recipes = search_recipe_name(cursor)
     if len(recipes) == 0:
         print("No recipes found!")

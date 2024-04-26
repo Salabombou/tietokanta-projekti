@@ -45,6 +45,7 @@ INSERT INTO RecipeHardware (recipe_id, hardware_id) VALUES
 (2, 3),
 (2, 4);
 
+-- Linking recipes and categories
 INSERT INTO RecipeCategories (recipe_id, category_id) VALUES 
 (1, 1),
 (2, 1);
