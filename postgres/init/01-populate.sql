@@ -21,7 +21,8 @@ INSERT INTO Categories ("name") VALUES
 -- Inserting some recipes
 INSERT INTO Recipes ("name", instructions, total_cooking_time) VALUES 
 ('Blueberry Pie', 'Mix ingredients and bake in oven for 45 minutes.', 45),
-('Raspberry Pie', 'Mix ingredients and bake in oven for 40 minutes.', 40);
+('Raspberry Pie', 'Mix ingredients and bake in oven for 40 minutes.', 40),
+('Rhubarb Pie', 'Mix ingredients and bake in oven for 30 minutes.', 30);
 
 -- Linking recipes and ingredients
 INSERT INTO RecipeIngredients (recipe_id, ingredient_id, quantity) VALUES 
@@ -32,7 +33,11 @@ INSERT INTO RecipeIngredients (recipe_id, ingredient_id, quantity) VALUES
 (2, 1, '2 cups'),
 (2, 2, '1 cup'),
 (2, 3, '2'),
-(2, 4, '1 cup');
+(2, 4, '1 cup'),
+(3, 1, '2 cups'),
+(3, 2, '1 cup'),
+(3, 3, '2'),
+(3, 4, '1 cup');
 
 -- Linking recipes and hardware
 INSERT INTO RecipeHardware (recipe_id, hardware_id) VALUES
@@ -43,9 +48,14 @@ INSERT INTO RecipeHardware (recipe_id, hardware_id) VALUES
 (2, 1),
 (2, 2),
 (2, 3),
-(2, 4);
+(2, 4),
+(3, 1),
+(3, 2),
+(3, 3),
+(3, 4);
 
 -- Linking recipes and categories
 INSERT INTO RecipeCategories (recipe_id, category_id) VALUES 
 (1, 1),
-(2, 1);
+(2, 1),
+(3, 1);
