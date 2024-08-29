@@ -249,11 +249,9 @@ def add_recipe(cursor: cursor):
 
     # Add the recipe
     cursor.execute(
-        "INSERT INTO Recipes (\"name\", instructions, total_cooking_time) VALUES (%s, %s, %s)",
+        "INSERT INTO Recipes (\"name\", instructions, total_cooking_time) VALUES (%s, %s, %s) RETURNING id",
         (name, instructions, total_cooking_time),
     )
-
-    cursor.execute("SELECT SCOPE_IDENTITY()")
     recipe_id = cursor.fetchone()[0]
 
     for ingredient in ingredients:
@@ -261,9 +259,8 @@ def add_recipe(cursor: cursor):
         ingredient_id = cursor.fetchone()
         if ingredient_id is None:
             cursor.execute(
-                "INSERT INTO Ingredients (\"name\") VALUES (%s)", (ingredient,)
+                "INSERT INTO Ingredients (\"name\") VALUES (%s) RETURNING id", (ingredient,)
             )
-            cursor.execute("SELECT SCOPE_IDENTITY()")
             ingredient_id = cursor.fetchone()
         ingredient_id = ingredient_id[0]
 
@@ -276,8 +273,7 @@ def add_recipe(cursor: cursor):
         cursor.execute("SELECT id FROM Hardware WHERE \"name\" = %s", (hardware,))
         hardware_id = cursor.fetchone()
         if hardware_id is None:
-            cursor.execute("INSERT INTO Hardware (\"name\") VALUES (%s)", (hardware,))
-            cursor.execute("SELECT SCOPE_IDENTITY()")
+            cursor.execute("INSERT INTO Hardware (\"name\") VALUES (%s) RETURNING id", (hardware,))
             hardware_id = cursor.fetchone()
         hardware_id = hardware_id[0]
 
@@ -342,13 +338,13 @@ def update_recipe(cursor: cursor):
 
     print(f"Update Recipe ({recipe[1]})\n")
 
-    if input("Update name? (y/n): ").lower() == "y":
+    if input("Update name? (y/N): ").lower() == "y":
         name = input(f"Name: ")
         cursor.execute(
             "UPDATE Recipes SET \"name\" = %s WHERE id = %s", (name, recipe_id)
         )
 
-    if input("Update ingredients? (y/n): ").lower() == "y":
+    if input("Update ingredients? (y/N): ").lower() == "y":
         quantity: Dict[str, str] = {}
         ingredients = (i.strip() for i in input(f"Ingredients: ").split(","))
         for ingredient in ingredients:
@@ -406,7 +402,7 @@ def update_recipe(cursor: cursor):
                 (recipe_id, ingredient_id, quantity[ingredient]),
             )
 
-    if input("Update hardware? (y/n): ").lower() == "y":
+    if input("Update hardware? (y/N): ").lower() == "y":
         hardware = (h.strip() for h in input(f"Hardware: ").split(","))
         cursor.execute("DELETE FROM RecipeHardware WHERE recipe_id = %s", (recipe_id,))
         for hardware in hardware:
@@ -424,7 +420,7 @@ def update_recipe(cursor: cursor):
                 (recipe_id, hardware_id),
             )
 
-    if input("Update categories? (y/n): ").lower() == "y":
+    if input("Update categories? (y/N): ").lower() == "y":
         categories = (c.strip() for c in input(f"Categories: ").split(","))
         cursor.execute(
             "DELETE FROM RecipeCategories WHERE recipe_id = %s", (recipe_id,)
@@ -446,14 +442,14 @@ def update_recipe(cursor: cursor):
                 (recipe_id, category_id),
             )
 
-    if input("Update instructions? (y/n): ").lower() == "y":
+    if input("Update instructions? (y/N): ").lower() == "y":
         instructions = input(f"Instructions: ")
         cursor.execute(
             "UPDATE Recipes SET instructions = %s WHERE id = %s",
             (instructions, recipe_id),
         )
 
-    if input("Update total cooking time? (y/n): ").lower() == "y":
+    if input("Update total cooking time? (y/N): ").lower() == "y":
         total_cooking_time = input(f"Total cooking time (minutes): ")
         cursor.execute(
             "UPDATE Recipes SET total_cooking_time = %s WHERE id = %s",
@@ -498,7 +494,7 @@ def delete_recipe(cursor: cursor):
             return
         elif key == "a":
             if (
-                input("Are you sure you want to delete all recipes? (y/n): ").lower()
+                input("Are you sure you want to delete all recipes? (y/N): ").lower()
                 == "y"
             ):
                 for recipe in recipes:
@@ -531,7 +527,7 @@ def delete_recipe(cursor: cursor):
     
     print(f"Delete Recipe ({recipe[1]})\n")
 
-    if input("Are you sure you want to delete this recipe? (y/n): ").lower() == "y":
+    if input("Are you sure you want to delete this recipe? (y/N): ").lower() == "y":
         cursor.execute(
             "DELETE FROM RecipeIngredients WHERE recipe_id = %s", (recipe_id,)
         )

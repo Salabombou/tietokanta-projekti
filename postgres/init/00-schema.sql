@@ -1,7 +1,7 @@
 -- The Recipes table stores information about each recipe.
 CREATE TABLE Recipes (
     id SERIAL PRIMARY KEY,
-    "name" VARCHAR(100) NOT NULL,
+    "name" TEXT NOT NULL,
     instructions TEXT,
     total_cooking_time INT
 );
@@ -9,27 +9,27 @@ CREATE TABLE Recipes (
 -- The Ingredients table stores information about each ingredient that can be used in recipes.
 CREATE TABLE Ingredients (
     id SERIAL PRIMARY KEY,
-    "name" VARCHAR(100) NOT NULL,
-    alternatives VARCHAR(100)
+    "name" TEXT NOT NULL,
+    alternatives TEXT
 );
 
 -- The Hardware table stores information about each piece of hardware that can be used in recipes.
 CREATE TABLE Hardware (
     id SERIAL PRIMARY KEY,
-    "name" VARCHAR(100)
+    "name" TEXT
 );
 
 -- The Categories table stores different categories that a recipe can belong to.
 CREATE TABLE Categories (
     id SERIAL PRIMARY KEY,
-    "name" VARCHAR(100)
+    "name" TEXT
 );
 
 -- The RecipeIngredients table links recipes and ingredients together.
 CREATE TABLE RecipeIngredients (
     recipe_id INT REFERENCES Recipes(id),
     ingredient_id INT REFERENCES Ingredients(id),
-    quantity VARCHAR(50)
+    quantity TEXT
 );
 
 -- The RecipeHardware table links recipes and hardware together.
